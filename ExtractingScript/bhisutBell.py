@@ -29,8 +29,8 @@ for description in element.findAll('td'):
 			data['name'] = value.contents[0]
 			data['url'] ="http://vssut.ac.in/" + value.attrs["href"]
 			json_data = json.dumps(data)
-			print(json_data)
 			response = requests.post(url, data=json_data)
+			print(json_data)
 	else:
 		data = {}
 		data['date'] = value
@@ -42,5 +42,20 @@ response = requests.put(latestNoticeUrl, data=json_data)
 
 
 stop = timeit.default_timer()
-
 print(stop - start)
+
+# send notification to everyone
+header = {"Content-Type": "application/json; charset=utf-8",
+          "Authorization": "Basic NWViNjZmOTUtMjIyZi00NDcyLTkxYmItNmMyMTM0YjA2ZWQ2"}
+
+payload = {"app_id": "eaf72e14-0237-4e72-a0f6-abf7ca732db6",
+           "included_segments": ["All"],
+           "android_group": "Bhisut",
+           "contents": {"en": "English Message1"},
+           "url": "http://www.google.com",
+           "large_icon": "http://icons.iconarchive.com/icons/fps.hu/free-christmas-flat/128/bell-icon.png"
+           }
+ 
+req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
+ 
+print(req.status_code, req.reason)
