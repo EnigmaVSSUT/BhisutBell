@@ -27,10 +27,12 @@ for description in element.findAll('td'):
 			break
 		else:
 			data['name'] = value.contents[0]
-			data['url'] ="http://vssut.ac.in/" + value.attrs["href"]
+			data['url'] = "http://vssut.ac.in/" + value.attrs["href"]
 			json_data = json.dumps(data)
 			response = requests.post(url, data=json_data)
 			print(json_data)
+			notification_message = value.contents[0]
+			notification_url = "http://vssut.ac.in/" + value.attrs["href"]
 	else:
 		data = {}
 		data['date'] = value
@@ -51,8 +53,8 @@ header = {"Content-Type": "application/json; charset=utf-8",
 payload = {"app_id": "eaf72e14-0237-4e72-a0f6-abf7ca732db6",
            "included_segments": ["All"],
            "android_group": "Bhisut",
-           "contents": {"en": "English Message1"},
-           "url": "http://www.google.com",
+           "contents": {"en": notification_message},
+           "url": notification_url,
            "large_icon": "http://icons.iconarchive.com/icons/fps.hu/free-christmas-flat/128/bell-icon.png"
            }
  
