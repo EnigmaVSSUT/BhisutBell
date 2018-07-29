@@ -2,11 +2,6 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import requests
 import json
-import timeit
-
-start = timeit.default_timer()
-
-#Your statements here
 
 url = 'https://bhisutbell.firebaseio.com/notices.json'
 latestNoticeUrl = 'https://bhisutbell.firebaseio.com/latestNotice.json'
@@ -19,8 +14,6 @@ element = soup.find("table", class_="table")
 isTagType = type(element.findAll('td')[0]) #To exclude NavigableString from Tag. Initialized here!
 latestNotice = requests.get(latestNoticeUrl)
 
-notice_messages = []
-notice_urls = []
 notifications = []
 
 for description in element.findAll('td'):
@@ -33,11 +26,9 @@ for description in element.findAll('td'):
 			data['name'] = value.contents[0]
 			data['url'] = "http://vssut.ac.in/" + value.attrs["href"]
 			json_data = json.dumps(data)
-			#	response = requests.post(url, data=json_data)
+			response = requests.post(url, data=json_data)
 			print(json_data)
 			notifications.append(data)
-			# notice_messages.append(value.contents[0])
-			# notice_urls.append("http://vssut.ac.in/" + value.attrs["href"])
 	else:
 		data = {}
 		data['date'] = value
@@ -48,9 +39,9 @@ json_data = json.dumps(json_data)
 response = requests.put(latestNoticeUrl, data=json_data)
 
 # send notification
+header = {"Content-Type": "application/json; charset=utf-8",
+          "Authorization": "Basic ******ask Saswat Sahoo(ss.saswatsahoo@gmail.com) for key******"}
 for notification in notifications:
-	header = {"Content-Type": "application/json; charset=utf-8",
-	          "Authorization": "Basic NWViNjZmOTUtMjIyZi00NDcyLTkxYmItNmMyMTM0YjA2ZWQ2"}
 
 	payload = {"app_id": "eaf72e14-0237-4e72-a0f6-abf7ca732db6",
 	           "included_segments": ["All"],
@@ -62,6 +53,3 @@ for notification in notifications:
 	 
 	req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
 	print(req.status_code, req.reason)
-
-stop = timeit.default_timer()
-print(stop - start)
