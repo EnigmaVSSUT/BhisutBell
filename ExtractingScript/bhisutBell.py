@@ -2,6 +2,11 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import requests
 import json
+import timeit
+
+start = timeit.default_timer()
+
+#Your statements here
 
 url = 'https://bhisutbell.firebaseio.com/notices.json'
 latestNoticeUrl = 'https://bhisutbell.firebaseio.com/latestNotice.json'
@@ -34,3 +39,8 @@ for description in element.findAll('td'):
 json_data = element.find('a').contents[0]
 json_data = json.dumps(json_data)
 response = requests.put(latestNoticeUrl, data=json_data)
+
+
+stop = timeit.default_timer()
+
+print(stop - start)
