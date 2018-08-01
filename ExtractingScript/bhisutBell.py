@@ -47,7 +47,8 @@ def job():
 
 	# send notification
 	header = {"Content-Type": "application/json; charset=utf-8",
-	          "Authorization": "Basic ****ask ss.saswatsahoo@gmail.com***"}
+	          "Authorization": "Basic MWViN2Y2N2MtMGZkNC00NzRhLTg3ZWEtMDg3OGNmOTY0ZTk1"}
+	          # "Authorization": "Basic ****ask ss.saswatsahoo@gmail.com***"}
 	for notification in notifications:
 
 		payload = {"app_id": "eaf72e14-0237-4e72-a0f6-abf7ca732db6",
@@ -55,7 +56,7 @@ def job():
 		           "android_group": "Bhisut",
 		           "contents": {"en": notification["name"]},
 		           "url":  notification["url"],
-		           "large_icon": "http://icons.iconarchive.com/icons/fps.hu/free-christmas-flat/128/bell-icon.png"
+		           "large_icon": "https://firebasestorage.googleapis.com/v0/b/bhisutbell.appspot.com/o/notification%20(1).png?alt=media&token=396376b3-6c51-4cfc-80a3-a57f6237420f"
 		           }
 		 
 		req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
