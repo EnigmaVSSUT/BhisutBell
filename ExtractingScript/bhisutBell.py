@@ -47,8 +47,7 @@ def job():
 
 	# send notification
 	header = {"Content-Type": "application/json; charset=utf-8",
-	          "Authorization": "Basic MWViN2Y2N2MtMGZkNC00NzRhLTg3ZWEtMDg3OGNmOTY0ZTk1"}
-	          # "Authorization": "Basic ****ask ss.saswatsahoo@gmail.com***"}
+	          "Authorization": "Basic ****ask ss.saswatsahoo@gmail.com***"}
 	for notification in notifications:
 
 		payload = {"app_id": "eaf72e14-0237-4e72-a0f6-abf7ca732db6",
