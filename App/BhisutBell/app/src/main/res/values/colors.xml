@@ -2,5 +2,9 @@
 <resources>
     <color name="colorPrimary">#64d8d7</color>
     <color name="colorPrimaryDark">#64d8d7</color>
-    <color name="colorAccent">#ff717f</color>
+    <color name="colorAccent">#FD6D78</color>
+    <color name="colorReadNotification">#ffffff</color>
+    <color name="colorUnreadNotification">#faf4e6</color>
+    <color name="colorTitle">#69625b</color>
+    <color name="colorTime">#877d74</color>
 </resources>
