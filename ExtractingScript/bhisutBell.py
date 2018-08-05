@@ -12,6 +12,7 @@ def job():
 
 	url = 'https://bhisutbell.firebaseio.com/notices.json'
 	latestNoticeUrl = 'https://bhisutbell.firebaseio.com/latestNotice.json'
+	lastUpdated = 'https://bhisutbell.firebaseio.com/lastUpdated.json'
 
 	html = urlopen("http://vssut.ac.in/").read()
 	soup = BeautifulSoup(html, "lxml")
@@ -61,6 +62,9 @@ def job():
 		req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
 		print(req.status_code, req.reason)
 
+	# update lastUpdated value
+	json_data = json.dumps(str(datetime.datetime.now()))
+	response = requests.put(lastUpdated, data=json_data)
 
 	stop = timeit.default_timer()
 	file = open('logs.txt', 'a')
@@ -68,8 +72,8 @@ def job():
 	print("Time taken to run: " + str(stop-start) + " @ " + str(datetime.datetime.now()) + '\n\n')
 	file.close()
 
-schedule.every(15).minutes.do(job)
-schedule.every().day.at("13:40").do(job)
+schedule.every(1).minute.do(job)
+schedule.every().day.at("01:01").do(job)
 
 while 1:
     schedule.run_pending()
