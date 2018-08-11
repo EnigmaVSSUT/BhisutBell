@@ -11,27 +11,28 @@
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_top"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:background="#56365b"
         android:minHeight="?attr/actionBarSize" >
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Notices"
-            android:textColor="@color/colorTitle"
-            android:textSize="20sp"
-            android:fontFamily="sans-serif-light"
-            android:layout_gravity="center"
-            android:id="@+id/toolbar_title" />
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Notices"-->
+            <!--android:textColor="@color/colorTitle"-->
+            <!--android:textSize="20sp"-->
+            <!--android:fontFamily="sans-serif-light"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:id="@+id/toolbar_title" />-->
 
 
         <include layout="@layout/timer"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/layout_timer"/>
+
 
     </android.support.v7.widget.Toolbar>
 
@@ -42,49 +43,39 @@
         style="@style/SpinKitView.Large.Circle"
         android:layout_centerInParent="true"/>
 
-    <android.support.v7.widget.SearchView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/search_bar"
-        android:layout_below="@+id/toolbar_top"
-        android:queryHint="Search Here"
-        android:clickable="true" />
-
-    <!--<AutoCompleteTextView-->
-        <!--android:id="@+id/autocomplete_notices"-->
+    <!--<android.support.v7.widget.SearchView-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="wrap_content"-->
-        <!--android:ems="10"-->
-        <!--android:imeOptions="actionSearch"-->
-        <!--android:hint="Search"-->
-        <!--android:textColorLink="@color/colorTitle"-->
-        <!--android:textColorHint="@color/colorTextUpdate"-->
-        <!--android:textColorHighlight="@color/colorTitle"-->
-        <!--android:inputType="textAutoComplete|textAutoCorrect"-->
-        <!--android:textColor="@color/colorTitle"-->
-        <!--android:popupBackground="@drawable/background_blur"-->
-        <!--android:layout_below="@+id/toolbar_top">-->
+        <!--android:id="@+id/search_bar"-->
+        <!--style="@style/SearchViewStyle"-->
+        <!--android:layout_below="@+id/toolbar_top"-->
+        <!--android:queryHint="Search Here"-->
+        <!--android:clickable="true" />-->
 
-        <!--&lt;!&ndash;<requestFocus />&ndash;&gt;-->
-    <!--</AutoCompleteTextView>-->
-
-    <TextView
+    <AutoCompleteTextView
+        android:id="@+id/autocomplete_notices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/textView_info"
-        android:textAlignment="center"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:textSize="12sp"
-        android:textColor="@color/colorTextUpdate"
-        android:text="You'll receive notifications whenever the college website receives a new notification!"
-        android:layout_below="@+id/search_bar" />
+        android:ems="10"
+        android:imeOptions="actionSearch"
+        android:hint=" Search"
+        android:textColorHint="@color/colorTextUpdate"
+        android:inputType="textAutoComplete|textAutoCorrect"
+        android:textColor="@color/colorTitle"
+        android:popupBackground="@drawable/background_blur"
+        android:layout_below="@+id/toolbar_top"
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:drawableEnd="@android:drawable/ic_menu_close_clear_cancel">
+
+        <!--<requestFocus />-->
+    </AutoCompleteTextView>
+
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/listView_notifications"
-        android:layout_below="@+id/textView_info"
+        android:layout_below="@+id/autocomplete_notices"
         android:layout_marginTop="10dp"/>
 
 

@@ -8,19 +8,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.ybq.android.spinkit.style.FoldingCube;
 import com.google.firebase.database.ChildEventListener;
@@ -40,7 +40,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class HomePage extends AppCompatActivity implements AdapterView.OnItemClickListener, SearchView.OnQueryTextListener {
+public class HomePage extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static final String BHISUT_PREFS = "BhisutBellDB";
     private ListView listView_Notifications;
@@ -57,10 +57,11 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
     private TextView textView_lastUpdated;
     private ProgressBar progressBar;
 
+    private AutoCompleteTextView autocompleteNotices;
+
     private long timeCountInMilliSeconds = 1 * 60000;
     private CountDownTimer countDownTimer;
     private int noticesCount;
-    private SearchView searchView;
 
     private enum TimerStatus {
         STARTED,
@@ -93,25 +94,27 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
         //set font style
         custom_font = Typeface.createFromAsset(getAssets(),  "fonts/lato_light.ttf");
 
-        searchView.setOnQueryTextListener(this);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-
-                if(listNotificationTitles.contains(query)){
-                    adapter_notifications.getFilter().filter(query);
-                }else{
-                    Toast.makeText(HomePage.this, "No Match found",Toast.LENGTH_LONG).show();
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //    adapter.getFilter().filter(newText);
-                return false;
-            }
-        });
+//        searchView.setOnQueryTextListener(this);
+//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//
+//                Log.e("query", query + listNotificationTitles.contains(query));
+//                if(listNotificationTitles.contains(query)){
+//                    adapter_notifications.getFilter().filter(query);
+//                }else{
+//                    Toast.makeText(HomePage.this, "No Match found",Toast.LENGTH_LONG).show();
+//                }
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                Log.e("query", newText);
+//                adapter_notifications.getFilter().filter(newText);
+//                return false;
+//            }
+//        });
 
 //        searchView.addTextChangedListener(new TextWatcher() {
 //
@@ -137,19 +140,42 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
 
     private void setAutoCompleteSearchBox() {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, listNotificationTitles);
-        //autocompleteNotices.setLinkTextColor(R.color.colorTitle);
-//        autocompleteNotices.setAdapter(adapter);
-//        autocompleteNotices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
-//
-//                adapter_notifications.getFilter().filter("notice");
-//                adapter_notifications.notifyDataSetChanged();
-////                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(listNotificationURLs.get(position)));
-////                startActivity(browserIntent);
-//            }
-//        });
+                R.layout.autocomplete_dropdown, listNotificationTitles);
+        autocompleteNotices.setAdapter(adapter);
+        autocompleteNotices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
+
+                adapter_notifications.getFilter().filter("notice");
+                adapter_notifications.notifyDataSetChanged();
+//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(listNotificationURLs.get(position)));
+//                startActivity(browserIntent);
+            }
+        });
+
+        autocompleteNotices.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_RIGHT = 2;
+
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (autocompleteNotices.getRight() - autocompleteNotices.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        Log.e("search", "right clicked");
+
+                        return true;
+                    }else if(event.getRawX() >= (autocompleteNotices.getLeft() - autocompleteNotices.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width())) {
+                        // your action here
+                        Log.e("search", "left clicked");
+
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
     }
 
     private void initLocalDatabase() {
@@ -234,7 +260,8 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
         listView_Notifications = (ListView) findViewById(R.id.listView_notifications);
         textView_lastUpdated = (TextView) findViewById(R.id.textView_info);
         textView_timer =  (TextView) findViewById(R.id.textView_time_timer);
-        searchView = (SearchView) findViewById(R.id.search_bar);
+        autocompleteNotices = (AutoCompleteTextView) findViewById(R.id.autocomplete_notices);
+//        searchView = (SearchView) findViewById(R.id.search_bar);
     }
 
     private void initializeNotificationService() {
@@ -446,16 +473,6 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
         return hms;
 
 
-    }
-
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        return false;
     }
 
 }

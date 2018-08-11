@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="44dip"
-        android:gravity="center_vertical"
-        android:ellipsize="end"
-        android:layout_marginRight="12dip"
-        android:textStyle="bold"
-        android:textColor="@color/colorTitle"
-        android:id="@+id/textview"
-        android:textSize="12sp"
-        />
-</LinearLayout>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/any_id"
+    android:padding="8dp"
+    android:fontFamily="sans-serif-light"
+    android:textColor="@color/colorTitle"/>
