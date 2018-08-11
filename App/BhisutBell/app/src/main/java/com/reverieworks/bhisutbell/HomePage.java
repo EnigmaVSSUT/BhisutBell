@@ -1,17 +1,28 @@
 package com.reverieworks.bhisutbell;
 
+import android.animation.ObjectAnimator;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.github.ybq.android.spinkit.style.FoldingCube;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,9 +38,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
-public class HomePage extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class HomePage extends AppCompatActivity implements AdapterView.OnItemClickListener, SearchView.OnQueryTextListener {
 
+    private static final String BHISUT_PREFS = "BhisutBellDB";
     private ListView listView_Notifications;
     private ArrayAdapter<String> adapter_notifications;
     private DatabaseReference database_notificatons;
@@ -40,27 +53,116 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
     private ArrayList<String> listNotificationURLs = new ArrayList<>();
     private Typeface custom_font;
     private Toolbar mTopToolbar;
+    private TextView textView_timer;
     private TextView textView_lastUpdated;
+    private ProgressBar progressBar;
+
+    private long timeCountInMilliSeconds = 1 * 60000;
+    private CountDownTimer countDownTimer;
+    private int noticesCount;
+    private SearchView searchView;
+
+    private enum TimerStatus {
+        STARTED,
+        STOPPED
+    }
+
+    private TimerStatus timerStatus = TimerStatus.STOPPED;
+    private ProgressBar progressBarCircle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-
+//        getSupportActionBar().display;
 //        mTopToolbar = (Toolbar) findViewById(R.id.my_toolbar);
 //        setSupportActionBar(mTopToolbar);
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
+        FoldingCube foldingCube = new FoldingCube();
+        progressBar.setIndeterminateDrawable(foldingCube);
+        progressBar.setVisibility(View.VISIBLE);
 
         initializeNotificationService();
-        setIds();
-        setDatabase();
+        initViews();
+        initDatabases();
+        initLocalDatabase();
         setNotificationsList();
         setLastUpdate();
 
-//        textView_title = (TextView)findViewById(R.id.title_view);
-//
+
+        //set font style
         custom_font = Typeface.createFromAsset(getAssets(),  "fonts/lato_light.ttf");
 
+        searchView.setOnQueryTextListener(this);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                if(listNotificationTitles.contains(query)){
+                    adapter_notifications.getFilter().filter(query);
+                }else{
+                    Toast.makeText(HomePage.this, "No Match found",Toast.LENGTH_LONG).show();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //    adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+
+//        searchView.addTextChangedListener(new TextWatcher() {
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                System.out.println("Text ["+s+"]");
+//
+//                mSearchableAdapter.getFilter().filter(s.toString());
+//            }
+//
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count,
+//                                          int after) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//            }
+//        });
+
     }
+
+    private void setAutoCompleteSearchBox() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, listNotificationTitles);
+        //autocompleteNotices.setLinkTextColor(R.color.colorTitle);
+//        autocompleteNotices.setAdapter(adapter);
+//        autocompleteNotices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
+//
+//                adapter_notifications.getFilter().filter("notice");
+//                adapter_notifications.notifyDataSetChanged();
+////                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(listNotificationURLs.get(position)));
+////                startActivity(browserIntent);
+//            }
+//        });
+    }
+
+    private void initLocalDatabase() {
+        SharedPreferences prefs = getSharedPreferences(BHISUT_PREFS, MODE_PRIVATE);
+        noticesCount = prefs.getInt("LOCAL-NoticesCount", 99999);
+    }
+
+    private void storeNoticesLocally() {
+        SharedPreferences.Editor editor = getSharedPreferences(BHISUT_PREFS, MODE_PRIVATE).edit();
+        editor.putInt("LOCAL-NoticesCount", listNotificationTitles.size());
+        editor.apply();
+    }
+
 
     private void setLastUpdate() {
 
@@ -68,6 +170,7 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 textView_lastUpdated.setText(getDifferenceInDates(dataSnapshot.getValue().toString()));
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
@@ -82,46 +185,56 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
 
     private String getDifferenceInDates(String lastUpdate) {
         Date lastUpdateDate = null, currentDate = null;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-dd hh:mm:ss", Locale.US);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-dd HH:mm:ss", Locale.US);
         //"2018-08-05 04:06:14.037173"
         try {
             lastUpdateDate = simpleDateFormat.parse(lastUpdate);
 
-            Date c = Calendar.getInstance().getTime();
-            currentDate = simpleDateFormat.parse(simpleDateFormat.format(c));
+            Date date = Calendar.getInstance().getTime();
+            currentDate = simpleDateFormat.parse(simpleDateFormat.format(date));
+
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
         //milliseconds
-        long different = currentDate.getTime() - lastUpdateDate.getTime();
+        long difference = currentDate.getTime() - lastUpdateDate.getTime();
+        Log.e("Time", currentDate.getTime() + " " + lastUpdateDate.getTime() + " " + difference);
 
         long secondsInMilli = 1000;
         long minutesInMilli = secondsInMilli * 60;
         long hoursInMilli = minutesInMilli * 60;
         long daysInMilli = hoursInMilli * 24;
 
-        long elapsedDays = different / daysInMilli;
-        different = different % daysInMilli;
+        long elapsedDays = difference / daysInMilli;
+        difference = difference % daysInMilli;
 
-        long elapsedHours = different / hoursInMilli;
-        different = different % hoursInMilli;
+        long elapsedHours = difference / hoursInMilli;
+        difference = difference % hoursInMilli;
 
-        long elapsedMinutes = different / minutesInMilli;
+        long elapsedMinutes = difference / minutesInMilli;
 
-        return ("Last Updated : " + (elapsedDays == 0 ? "" : elapsedDays + " days ") +
-                (elapsedHours == 0 ? "" : elapsedHours + " hours ") +
-                (elapsedMinutes == 0 ? "" : elapsedMinutes + " minutes ") +
-                (elapsedDays == 0 && elapsedHours == 0 && elapsedMinutes == 0 ? " Few moments ago!": "ago!"));
+        // set the timer
+        startStop(difference);
+
+//        return ("Updated " + (elapsedDays == 0 ? "" : elapsedDays + " days ") +
+//                (elapsedHours == 0 ? "" : elapsedHours + " hours ") +
+//                (elapsedMinutes == 0 ? "" : elapsedMinutes + " minutes ") +
+//                (elapsedDays == 0 && elapsedHours == 0 && elapsedMinutes == 0 ?
+        return ("Last Updated: " + lastUpdate.substring(0, lastUpdate.length() - 7));
     }
 
-    private void setDatabase() {
+    private void initDatabases() {
         database_notificatons = FirebaseDatabase.getInstance().getReference().child("notices");
         database_lastUpdate = FirebaseDatabase.getInstance().getReference().child("lastUpdated");
     }
 
-    private void setIds() {
+    private void initViews() {
+        progressBarCircle = (ProgressBar) findViewById(R.id.progressBarCircle);
         listView_Notifications = (ListView) findViewById(R.id.listView_notifications);
         textView_lastUpdated = (TextView) findViewById(R.id.textView_info);
+        textView_timer =  (TextView) findViewById(R.id.textView_time_timer);
+        searchView = (SearchView) findViewById(R.id.search_bar);
     }
 
     private void initializeNotificationService() {
@@ -134,8 +247,25 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
 
     private void setNotificationsList() {
 
-        //fetch list of notifications
+        //runs after the list has been loaded
+        ValueEventListener lastUpdateListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                storeNoticesLocally();
+                setAutoCompleteSearchBox();
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w("ss", "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        };
+        database_notificatons.addValueEventListener(lastUpdateListener);
+
+
+        //fetch list of notifications
         adapter_notifications = new StableArrayAdapter();
         listView_Notifications.setAdapter(adapter_notifications);
         listView_Notifications.setOnItemClickListener(this);
@@ -148,9 +278,9 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
 
                 Log.e("List ","Adding " + notice.getName() + " to list");
 
-                listNotificationTitles.add(notice.getName());
-                listNotificationTimes.add(notice.getDate());
-                listNotificationURLs.add(notice.getUrl());
+                listNotificationTitles.add(0, notice.getName());
+                listNotificationTimes.add(0, notice.getDate());
+                listNotificationURLs.add(0, notice.getUrl());
 
                 adapter_notifications.notifyDataSetChanged();
 
@@ -176,22 +306,23 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
             }
         });
 
+        listView_Notifications.post(new Runnable() {
+            @Override
+            public void run() {
+                listView_Notifications.smoothScrollToPosition(0);
+            }
+        });
+
 
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        Log.e( "ItemClicked ",listNotificationTitles.get(i) + " " + l);
 
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(listNotificationURLs.get(i)));
+        startActivity(browserIntent);
     }
-
-//    @Override
-//    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//        Toolbox.showLog2(listUserStatusNames.get(i) + " " + listUserStatusUids.get(i) + " " + l);
-//        Intent intent = new Intent(getActivity(), ProfileInfo.class);
-//        intent.putExtra("EXTRA-targetUID", listUserStatusUids.get(i));
-//        intent.putExtra("EXTRA-profileInfoType", ProfileInfoTypes.SendRequest.toString());
-//        startActivity(intent);
-//    }
 
     private class StableArrayAdapter extends ArrayAdapter<String> {
 
@@ -208,10 +339,123 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
                 view = getLayoutInflater().inflate(R.layout.listview_notification, parent, false);
 
             TextView textView_title = (TextView) view.findViewById(R.id.textView_title_listView);
-            textView_title.setText(listNotificationTitles.get(position));
+            TextView textView_time = (TextView) view.findViewById(R.id.textView_time_listView);
+            ImageView imageView_newTag = (ImageView) view.findViewById(R.id.imageView_newTag_notification);
+
             textView_title.setTypeface(custom_font);
+            textView_time.setTypeface(custom_font);
+
+            textView_title.setText(listNotificationTitles.get(position));
+            textView_time.setText(listNotificationTimes.get(position));
+
+            if(position > noticesCount)
+                imageView_newTag.setVisibility(View.VISIBLE);
+            else
+                imageView_newTag.setVisibility(View.GONE);
 
             return view;
         }
     }
+
+    private void startStop(long currentTimeInMilliSeconds) {
+            // call to initialize the timer values
+            setTimerValues();
+            // call to initialize the progress bar values
+            setProgressBarValues(currentTimeInMilliSeconds);
+
+            // changing the timer status to started
+            timerStatus = TimerStatus.STARTED;
+            // call to start the count down timer
+            startCountDownTimer(currentTimeInMilliSeconds);
+
+
+    }
+
+    /**
+     * method to initialize the values for count down timer
+     */
+    private void setTimerValues() {
+        int time = 15;
+        // assigning values after converting to milliseconds
+        timeCountInMilliSeconds = time * 60 * 1000;
+    }
+
+    private void setProgressAnimate(ProgressBar progressBar, int progressTo, long timeRequiredToProgress)
+    {
+        Log.e("setProgressAnimate", progressBar.getProgress() + " " + progressTo * 100);
+        ObjectAnimator animation = ObjectAnimator.ofInt(progressBar, "progress",  progressBar.getProgress() ,progressTo * 100);
+        animation.setDuration(timeRequiredToProgress);
+        animation.setInterpolator(new LinearInterpolator());
+        animation.start();
+    }
+    /**
+     * method to start count down timer
+     */
+    private void startCountDownTimer(final long currentTimeInMilliSeconds) {
+
+        countDownTimer = new CountDownTimer(timeCountInMilliSeconds - currentTimeInMilliSeconds, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+                textView_timer.setText(hmsTimeFormatter(millisUntilFinished));
+
+            }
+
+            @Override
+            public void onFinish() {
+
+                textView_timer.setText("Updating!");
+                // changing the timer status to stopped
+                timerStatus = TimerStatus.STOPPED;
+            }
+
+        }.start();
+        countDownTimer.start();
+    }
+
+    /**
+     * method to stop count down timer
+     */
+    private void stopCountDownTimer() {
+        countDownTimer.cancel();
+    }
+
+    /**
+     * method to set circular progress bar values
+     */
+    private void setProgressBarValues(long currentProgress) {
+
+        progressBarCircle.setMax(((int) timeCountInMilliSeconds / 1000) * 100);
+        progressBarCircle.setProgress(((int) currentProgress / 1000) * 100);
+        setProgressAnimate(progressBarCircle, ((int) timeCountInMilliSeconds / 1000), timeCountInMilliSeconds - currentProgress);
+    }
+
+
+    /**
+     * method to convert millisecond to time format
+     *
+     * @param milliSeconds
+     * @return HH:mm:ss time formatted string
+     */
+    private String hmsTimeFormatter(long milliSeconds) {
+
+        String hms = String.format("%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(milliSeconds) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(milliSeconds)),
+                TimeUnit.MILLISECONDS.toSeconds(milliSeconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliSeconds)));
+
+        return hms;
+
+
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
+    }
+
 }

@@ -5,29 +5,88 @@
     android:id="@+id/activity_home_page"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:theme="@style/AppThemeNoActionBar"
     tools:context="com.reverieworks.bhisutbell.HomePage">
 
-    <!--<android.support.v7.widget.Toolbar-->
-        <!--android:id="@+id/my_toolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="?attr/actionBarSize"-->
-        <!--android:elevation="4dp"-->
-        <!--/>-->
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_top"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:background="#56365b"
+        android:minHeight="?attr/actionBarSize" >
 
-    <TextView
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notices"
+            android:textColor="@color/colorTitle"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-light"
+            android:layout_gravity="center"
+            android:id="@+id/toolbar_title" />
+
+
+        <include layout="@layout/timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/layout_timer"/>
+
+    </android.support.v7.widget.Toolbar>
+
+    <ProgressBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        style="@style/SpinKitView.Large.Circle"
+        android:layout_centerInParent="true"/>
+
+    <android.support.v7.widget.SearchView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/search_bar"
+        android:layout_below="@+id/toolbar_top"
+        android:queryHint="Search Here"
+        android:clickable="true" />
+
+    <!--<AutoCompleteTextView-->
+        <!--android:id="@+id/autocomplete_notices"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:ems="10"-->
+        <!--android:imeOptions="actionSearch"-->
+        <!--android:hint="Search"-->
+        <!--android:textColorLink="@color/colorTitle"-->
+        <!--android:textColorHint="@color/colorTextUpdate"-->
+        <!--android:textColorHighlight="@color/colorTitle"-->
+        <!--android:inputType="textAutoComplete|textAutoCorrect"-->
+        <!--android:textColor="@color/colorTitle"-->
+        <!--android:popupBackground="@drawable/background_blur"-->
+        <!--android:layout_below="@+id/toolbar_top">-->
+
+        <!--&lt;!&ndash;<requestFocus />&ndash;&gt;-->
+    <!--</AutoCompleteTextView>-->
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/textView_info"
-        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:textAlignment="center"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:text="You'll receive notifications if the college website receives new notice! This is beta version." />
+        android:textSize="12sp"
+        android:textColor="@color/colorTextUpdate"
+        android:text="You'll receive notifications whenever the college website receives a new notification!"
+        android:layout_below="@+id/search_bar" />
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/listView_notifications"
-        android:layout_below="@+id/textView_info" />
+        android:layout_below="@+id/textView_info"
+        android:layout_marginTop="10dp"/>
+
+
 
 </RelativeLayout>
