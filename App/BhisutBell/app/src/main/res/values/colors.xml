@@ -9,9 +9,10 @@
     <color name="colorTitle">#faeefc</color>
     <color name="colorTime">#c7c7c7</color>
 
-    <color name="colorPrimary">#ffffff</color>
-    <color name="colorPrimaryDark">#0E121B</color>
-    <color name="colorAccent">#F5FA55</color>
+    <color name="colorPrimary">#70425e</color>
+    <color name="colorPrimaryDark">#56365b</color>
+    <color name="colorPrimaryLight">#974e61</color>
+    <color name="colorAccent">#ffffff</color>
     <color name="colorBackground">#ffffff</color>
     <color name="colorYellow">#F5FA55</color>
 </resources>

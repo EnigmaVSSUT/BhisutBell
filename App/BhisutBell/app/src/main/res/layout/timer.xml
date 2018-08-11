@@ -19,7 +19,7 @@
         android:progress="100"
         android:progressDrawable="@drawable/timer_circle"
         android:background="@drawable/timer_circle2"
-        android:rotation="-90" />
+        android:rotation="-90"/>
 
     <TextView
         android:id="@+id/textView_time_timer"
@@ -29,5 +29,13 @@
         android:text="15:00"
         android:textColor="#ffffff"
         android:textSize="14sp" />
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView_info"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        android:textColor="@color/colorTextUpdate"
+        android:text="You'll receive notifications whenever the college website receives a new notification!"
+        android:layout_below="@+id/progressBarCircle"/>
 </RelativeLayout>
