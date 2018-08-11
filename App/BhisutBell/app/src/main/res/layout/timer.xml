@@ -36,6 +36,6 @@
         android:textAlignment="center"
         android:textSize="12sp"
         android:textColor="@color/colorTextUpdate"
-        android:text="You'll receive notifications whenever the college website receives a new notification!"
+        android:text="You'll receive notifications whenever the college website gets a new notice!"
         android:layout_below="@+id/progressBarCircle"/>
 </RelativeLayout>

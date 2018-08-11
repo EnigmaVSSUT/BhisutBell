@@ -4,16 +4,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_home_page"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="fill_parent"
     android:background="@drawable/background"
     android:theme="@style/AppThemeNoActionBar"
-    tools:context="com.reverieworks.bhisutbell.HomePage">
+    tools:context="com.reverieworks.bhisutbell.HomePage"
+    android:focusableInTouchMode="true">
+
+    <ImageView
+        android:id="@+id/imageView_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_info_details"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="5dp"/>
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#56365b"
         android:minHeight="?attr/actionBarSize" >
 
 
@@ -52,6 +61,13 @@
         <!--android:queryHint="Search Here"-->
         <!--android:clickable="true" />-->
 
+    <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+    <LinearLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0px"
+        android:layout_height="0px"/>
+
     <AutoCompleteTextView
         android:id="@+id/autocomplete_notices"
         android:layout_width="match_parent"
@@ -65,7 +81,13 @@
         android:popupBackground="@drawable/background_blur"
         android:layout_below="@+id/toolbar_top"
         android:drawableStart="@android:drawable/ic_menu_search"
-        android:drawableEnd="@android:drawable/ic_menu_close_clear_cancel">
+        android:drawableEnd="@android:drawable/ic_menu_close_clear_cancel"
+        android:nextFocusUp="@id/autocomplete_notices"
+        android:nextFocusLeft="@id/autocomplete_notices"
+        android:background="@color/colorTextUpdate"
+        android:backgroundTint="#644162"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <!--<requestFocus />-->
     </AutoCompleteTextView>
@@ -77,7 +99,5 @@
         android:id="@+id/listView_notifications"
         android:layout_below="@+id/autocomplete_notices"
         android:layout_marginTop="10dp"/>
-
-
 
 </RelativeLayout>

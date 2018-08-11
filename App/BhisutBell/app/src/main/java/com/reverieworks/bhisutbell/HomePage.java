@@ -1,6 +1,7 @@
 package com.reverieworks.bhisutbell;
 
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -14,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -22,7 +24,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.github.ybq.android.spinkit.style.FoldingCube;
+import com.github.ybq.android.spinkit.style.Wave;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -40,9 +42,10 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class HomePage extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class HomePage extends AppCompatActivity implements AdapterView.OnItemClickListener, View.OnClickListener, View.OnTouchListener {
 
     private static final String BHISUT_PREFS = "BhisutBellDB";
+    private boolean KEYBOARD_SHOWING = false;
     private ListView listView_Notifications;
     private ArrayAdapter<String> adapter_notifications;
     private DatabaseReference database_notificatons;
@@ -59,9 +62,11 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
 
     private AutoCompleteTextView autocompleteNotices;
 
-    private long timeCountInMilliSeconds = 1 * 60000;
+    private long timeCountInMilliSeconds = 60000;
     private CountDownTimer countDownTimer;
-    private int noticesCount;
+    private int noticesCount = 999999;
+    private ImageView imageView_info;
+
 
     private enum TimerStatus {
         STARTED,
@@ -79,12 +84,13 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
 //        mTopToolbar = (Toolbar) findViewById(R.id.my_toolbar);
 //        setSupportActionBar(mTopToolbar);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        FoldingCube foldingCube = new FoldingCube();
+        Wave foldingCube = new Wave();
         progressBar.setIndeterminateDrawable(foldingCube);
         progressBar.setVisibility(View.VISIBLE);
 
         initializeNotificationService();
         initViews();
+        initListeners();
         initDatabases();
         initLocalDatabase();
         setNotificationsList();
@@ -94,48 +100,30 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
         //set font style
         custom_font = Typeface.createFromAsset(getAssets(),  "fonts/lato_light.ttf");
 
-//        searchView.setOnQueryTextListener(this);
-//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//
-//                Log.e("query", query + listNotificationTitles.contains(query));
-//                if(listNotificationTitles.contains(query)){
-//                    adapter_notifications.getFilter().filter(query);
-//                }else{
-//                    Toast.makeText(HomePage.this, "No Match found",Toast.LENGTH_LONG).show();
-//                }
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                Log.e("query", newText);
-//                adapter_notifications.getFilter().filter(newText);
-//                return false;
-//            }
-//        });
+        //hide keyboard on opening activity
+        hideSoftKeyboard(autocompleteNotices);
 
-//        searchView.addTextChangedListener(new TextWatcher() {
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                System.out.println("Text ["+s+"]");
-//
-//                mSearchableAdapter.getFilter().filter(s.toString());
-//            }
-//
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count,
-//                                          int after) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//            }
-//        });
+    }
 
+
+    public void hideSoftKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+        KEYBOARD_SHOWING = false;
+    }
+    public void showSoftKeyboard(View view) {
+        if (view.requestFocus()) {
+            InputMethodManager imm = (InputMethodManager)
+                    getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+            KEYBOARD_SHOWING = true;
+        }
+    }
+    private void toogleKeyboard () {
+        if(KEYBOARD_SHOWING){
+            hideSoftKeyboard(autocompleteNotices);
+        }else
+            showSoftKeyboard(autocompleteNotices);
     }
 
     private void setAutoCompleteSearchBox() {
@@ -146,45 +134,22 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
             @Override
             public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
 
-                adapter_notifications.getFilter().filter("notice");
-                adapter_notifications.notifyDataSetChanged();
-//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(listNotificationURLs.get(position)));
-//                startActivity(browserIntent);
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(listNotificationURLs.get(position)));
+                startActivity(browserIntent);
             }
         });
-
-        autocompleteNotices.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                final int DRAWABLE_LEFT = 0;
-                final int DRAWABLE_RIGHT = 2;
-
-
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    if(event.getRawX() >= (autocompleteNotices.getRight() - autocompleteNotices.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                        // your action here
-                        Log.e("search", "right clicked");
-
-                        return true;
-                    }else if(event.getRawX() >= (autocompleteNotices.getLeft() - autocompleteNotices.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width())) {
-                        // your action here
-                        Log.e("search", "left clicked");
-
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
+        autocompleteNotices.setOnTouchListener(this);
     }
 
     private void initLocalDatabase() {
         SharedPreferences prefs = getSharedPreferences(BHISUT_PREFS, MODE_PRIVATE);
         noticesCount = prefs.getInt("LOCAL-NoticesCount", 99999);
+        Log.e("count", String.valueOf(noticesCount));
     }
 
     private void storeNoticesLocally() {
         SharedPreferences.Editor editor = getSharedPreferences(BHISUT_PREFS, MODE_PRIVATE).edit();
+        Log.e("count", String.valueOf(listNotificationTitles.size()));
         editor.putInt("LOCAL-NoticesCount", listNotificationTitles.size());
         editor.apply();
     }
@@ -261,9 +226,14 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
         textView_lastUpdated = (TextView) findViewById(R.id.textView_info);
         textView_timer =  (TextView) findViewById(R.id.textView_time_timer);
         autocompleteNotices = (AutoCompleteTextView) findViewById(R.id.autocomplete_notices);
-//        searchView = (SearchView) findViewById(R.id.search_bar);
+        imageView_info = (ImageView) findViewById(R.id.imageView_info);
+
+        imageView_info.bringToFront(); //prevent it to hide from toolbar
     }
 
+    private void initListeners() {
+        imageView_info.setOnClickListener(this);
+    }
     private void initializeNotificationService() {
         // OneSignal Initialization
         OneSignal.startInit(this)
@@ -303,7 +273,7 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
 
                 Notice notice = dataSnapshot.getValue(Notice.class);
 
-                Log.e("List ","Adding " + notice.getName() + " to list");
+//                Log.e("List ","Adding " + notice.getName() + " to list");
 
                 listNotificationTitles.add(0, notice.getName());
                 listNotificationTimes.add(0, notice.getDate());
@@ -471,8 +441,46 @@ public class HomePage extends AppCompatActivity implements AdapterView.OnItemCli
                 TimeUnit.MILLISECONDS.toSeconds(milliSeconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliSeconds)));
 
         return hms;
+    }
+
+    private void openProjectPage() {
+
+        Log.e("clicked","projectpageopen");
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/EnigmaVSSUT/BhisutBell"));
+        startActivity(browserIntent);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.imageView_info:
+                openProjectPage();
+        }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        final int DRAWABLE_LEFT = 0;
+        final int DRAWABLE_RIGHT = 2;
 
 
+        if(event.getAction() == MotionEvent.ACTION_UP) {
+            if(event.getRawX() >= (autocompleteNotices.getRight() - autocompleteNotices.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                // your action here
+                Log.e("search", "right clicked");
+                autocompleteNotices.setText("");
+                autocompleteNotices.clearFocus();
+                hideSoftKeyboard(autocompleteNotices);
+
+                return true;
+            }else if(event.getRawX() >= (autocompleteNotices.getLeft() - autocompleteNotices.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width())) {
+                // your action here
+                Log.e("search", "left clicked");
+                toogleKeyboard();
+                return true;
+            }
+        }
+        return false;
     }
 
 }
