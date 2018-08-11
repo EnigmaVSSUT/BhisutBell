@@ -27,11 +27,12 @@ def job():
 	for description in element.findAll('td'):
 		value = description.contents[0]
 		if type(value) is isTagType:
-			if latestNotice.text.strip('/"') == value.contents[0]:	# get latest notice title and check with the first title
+			latestNoticeCleaned = latestNotice.text.strip() # removes escape sequence
+			if latestNoticeCleaned.strip('/"') == value.contents[0].strip():	# get latest notice title and check with the first title
 				print('up-to-date')
 				break
 			else:
-				data['name'] = value.contents[0]
+				data['name'] = value.contents[0].strip()
 				data['url'] = "http://vssut.ac.in/" + value.attrs["href"]
 				json_data = json.dumps(data)
 				response = requests.post(url, data=json_data)
@@ -42,7 +43,7 @@ def job():
 			data['date'] = value
 
 	#	updating the latestNotice
-	json_data = element.find('a').contents[0]
+	json_data = element.find('a').contents[0].strip()
 	json_data = json.dumps(json_data)
 	response = requests.put(latestNoticeUrl, data=json_data)
 
@@ -72,8 +73,8 @@ def job():
 	print("Time taken to run: " + str(stop-start) + " @ " + str(datetime.datetime.now()) + '\n\n')
 	file.close()
 
-schedule.every(1).minute.do(job)
-schedule.every().day.at("01:01").do(job)
+schedule.every(15).minutes.do(job)
+schedule.every().day.at("00:09").do(job)
 
 while 1:
     schedule.run_pending()
