@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_main"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:theme="@style/AppThemeNoActionBar"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp"
+    android:paddingTop="10dp">
+    <!--android:background="@color/colorPrimaryDark"-->
+    <ProgressBar
+        android:id="@+id/progressBarCircle"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:indeterminate="false"
+        android:max="100"
+        android:progress="100"
+        android:progressDrawable="@drawable/timer_circle"
+        android:background="@drawable/timer_circle2"
+        android:rotation="-90"/>
+
+    <TextView
+        android:id="@+id/textView_time_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="15:00"
+        android:textColor="#ffffff"
+        android:textSize="14sp" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView_info"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        android:textColor="@color/colorTextUpdate"
+        android:text="You'll receive notifications whenever the college website gets a new notice!"
+        android:layout_below="@+id/progressBarCircle"/>
+</RelativeLayout>

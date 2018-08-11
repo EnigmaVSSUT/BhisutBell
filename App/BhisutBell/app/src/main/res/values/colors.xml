@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#64d8d7</color>
-    <color name="colorPrimaryDark">#64d8d7</color>
-    <color name="colorAccent">#FD6D78</color>
+    <!--<color name="colorPrimary">#64d8d7</color>-->
+    <!--<color name="colorPrimaryDark">#64d8d7</color>-->
+    <!--<color name="colorAccent">#FD6D78</color>-->
     <color name="colorReadNotification">#ffffff</color>
     <color name="colorUnreadNotification">#faf4e6</color>
-    <color name="colorTitle">#69625b</color>
-    <color name="colorTime">#877d74</color>
+    <color name="colorTextUpdate">#a1a1a1</color>
+    <color name="colorTitle">#faeefc</color>
+    <color name="colorTime">#c7c7c7</color>
+
+    <color name="colorPrimary">#70425e</color>
+    <color name="colorPrimaryDark">#56365b</color>
+    <color name="colorPrimaryLight">#974e61</color>
+    <color name="colorAccent">#ffffff</color>
+    <color name="colorBackground">#ffffff</color>
+    <color name="colorYellow">#F5FA55</color>
 </resources>
