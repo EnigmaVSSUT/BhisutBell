@@ -7,6 +7,13 @@ I would add you to the organization and then you can make contributions. <br>
 Make sure to create a separate branch and push your commits <br>
 *A detailed guideline will be updated soon*
 
+# Contributors
+- Saswat Sahoo
+    - https://github.com/reverie-ss
+    - https://www.linkedin.com/in/reverie-ss
+
+*Anyone who contributes will find his name here*
+
 # Things to note
 This project is only for educational and learning purpose
 
